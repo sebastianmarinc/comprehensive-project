@@ -1,0 +1,12 @@
+name: projectA
+title: projectA
+username:
+account: seabass
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2221337
+bundleId: 3095225
+url: https://seabass.shinyapps.io/projectA/
+when: 1588466244.11839
+asMultiple: FALSE
+asStatic: FALSE
