@@ -1,0 +1,17 @@
+Bibliography
+Data Sharing in the Social Sciences, 2009 [United States] Public Use Data
+
+This bibliography includes published and unpublished works that are related 
+to ICPSR study 29941. It includes works that are based on primary
+or secondary analysis of the data, or which describe or critique those
+data or the collection methodology. 
+
+If you publish a work or know of other works that are based on these data,
+please send the complete citation and name of the ICPSR study used to:
+icpsr-biblio-notify@umich.edu 
+
+
+1. Pienta, Amy M.; Alter, George C.; Lyle, Jared A., "The Enduring Value of
+Social Science Research: The Use and Reuse of Primary Research Data."
+Torino, Italy, Apr 2010.
+Full text: http://deepblue.lib.umich.edu/handle/2027.42/78307

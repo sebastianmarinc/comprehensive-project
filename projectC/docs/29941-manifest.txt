@@ -1,0 +1,54 @@
+File Manifest for ICPSR 29941
+
+Pienta, Amy M., and Jared Lyle. Data Sharing in the Social Sciences, 2009
+[United States] Public Use Data. ICPSR29941-v1. Ann Arbor, MI: Inter-
+university Consortium for Political and Social Research [distributor],
+2016-12-15. http://doi.org/10.3886/ICPSR29941.v1
+
+
+Study-level Documentation
+
+    Filename                            Record  Record    Var.    Date        MD5
+                                        Length  Count     Count   Updated     Checksum
+
+    29941-descriptioncitation.pdf       -       -         -       2016-12-15  -
+
+    29941-related_literature.txt        -       -         -       daily       -
+
+    29941-manifest.txt                  -       -         -       daily       -
+
+
+DS0001 Data Sharing in the Social Sciences, 2009 [United States] Public Use
+Data
+
+    Filename                            Record  Record    Var.    Date        MD5
+                                        Length  Count     Count   Updated     Checksum
+
+    29941-0001-Codebook.pdf             -       -         -       2016-12-15  b5b9340cfc95e65727d942c03f462e65
+
+    29941-0001-Data.dta                 -       1,021     109     2016-12-15  d883a6af52374bf0e1e65f5e9228cb35
+
+    29941-0001-Data.rda                 -       1,021     109     2016-12-15  6c52437f46b61227f15cd773df08b7a5
+
+    29941-0001-Data.sav                 -       1,021     109     2016-12-15  f0b0f8e913cada34aa9df7737fdf956d
+
+    29941-0001-Data.stc                 -       1,021     109     2016-12-15  2b8d9b3bd2e560f9eeb031f73c983e5f
+
+    29941-0001-Data.tsv                 -       1,021     109     2016-12-15  1a64cc7e90e3e6f15741d5db852398fb
+
+    29941-0001-Data.txt                 311     1,021     109     2016-12-15  a0deeedc08f987cae53f5826c7359144
+
+    29941-0001-Questionnaire.pdf        -       -         -       2016-12-15  859e712ed0a42dbcfdfc5468113b361a
+
+    29941-0001-Setup.dct                -       -         -       2016-12-15  d6f4168949b54a802d17fb022a7569cd
+
+    29941-0001-Setup.do                 -       -         -       2016-12-15  03309c980dbc755b639f08e9d3947512
+
+    29941-0001-Setup.sas                -       -         -       2016-12-15  555cc4ac734b52d913c4779dbddd3f86
+
+    29941-0001-Setup.sps                -       -         -       2016-12-15  6c6b72d98c155b4274e470a61baad373
+
+    29941-0001-Supplemental_syntax.do   -       -         -       2016-12-15  0e4130386200f7455e918f2730b78475
+
+    29941-0001-Supplemental_syntax.sas  -       -         -       2016-12-15  3a5a12d7096b965300e38a3fc97901e0
+
