@@ -19,12 +19,12 @@ library(naniar)
 # library(data.table)
 
 # global options
-opts_chunk$set(echo=T, cache=T,prompt=F,tidy=T,comment=NA,message=F,warning=F)
+opts_chunk$set(echo=T, cache=F,prompt=F,tidy=T,comment=NA,message=F,warning=F)
 ```
 
 # R Studio API Code
 ```{r}
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ```
 
 # Data Importing and Cleaning
