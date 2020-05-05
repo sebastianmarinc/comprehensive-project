@@ -1,5 +1,5 @@
 ---
-title: "Predicting Personality from Mobile Data Use"
+title: "Project C"
 author: "Sebastian Marin"
 date: "`r Sys.Date()`"
 output:
@@ -14,8 +14,9 @@ library(rmdformats)
 library(tidyverse)
 library(caret)
 library(doParallel)
-library(DT)
-library(data.table)
+library(naniar)
+# library(DT)
+# library(data.table)
 
 # global options
 opts_chunk$set(echo=T, cache=T,prompt=F,tidy=T,comment=NA,message=F,warning=F)
@@ -28,81 +29,30 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 # Data Importing and Cleaning
 ```{r}
-df = read_csv("macaco_dataset.csv")[,-1]
-```
+load("/Users/sebastianmarin/Downloads/ICPSR_29941/DS0001/29941-0001-Data.rda")
+df = da29941.0001
+colnames(df) = tolower(colnames(df))
 
-# Analysis
-```{r}
-cores = detectCores() - 1
-cl = makeCluster(cores)
-registerDoParallel(cl)
+# missingness summaries
+miss_var_summary(df)
+miss_case_summary(df)
 
-model_O = train(O ~ .,
-                data = df,
-                method = "glmnet",
-                preProcess = c("center","scale","zv"),
-                trControl = trainControl(
-                  method = "cv",
-                  number = 10,
-                  verboseIter = T
-                )
-)
-model_C = train(C ~ .,
-                data = df,
-                method = "glmnet",
-                preProcess = c("center","scale","zv"),
-                trControl = trainControl(
-                  method = "cv",
-                  number = 10,
-                  verboseIter = T
-                )
-)
-model_E = train(E ~ .,
-                data = df,
-                method = "glmnet",
-                preProcess = c("center","scale","zv"),
-                trControl = trainControl(
-                  method = "cv",
-                  number = 10,
-                  verboseIter = T
-                )
-)
-model_A = train(A ~ .,
-                data = df,
-                method = "glmnet",
-                preProcess = c("center","scale","zv"),
-                trControl = trainControl(
-                  method = "cv",
-                  number = 10,
-                  verboseIter = T
-                )
-)
-model_N = train(A ~ .,
-                data = df,
-                method = "glmnet",
-                preProcess = c("center","scale","zv"),
-                trControl = trainControl(
-                  method = "cv",
-                  number = 10,
-                  verboseIter = T
-                )
-)
+# drop variables with over 70% missingness
+var_miss_70 = miss_var_summary(df) %>% 
+  filter(pct_miss > 70) %>% 
+  select(variable)
 
-stopCluster(cl)
-registerDoSEQ()
+df = df %>% 
+  select(-unlist(var_miss_70))
 
-```
+# drop conditional variables
+df = df %>% 
+  select(-str_subset(names(df), "yn"))
 
-# Visualization
+# convert factors to numerics
 
-```{r}
-imp_tbl = tibble(
-  variables = names(df),
-  openness= append(varImp(model_O)$importance$Overall,NA),
-  extraversion = append(varImp(model_E)$importance$Overall,NA,after=346),
-  agreeableness = append(varImp(model_A)$importance$Overall,NA,after=347),
-  conscientiousness = append(varImp(model_C)$importance$Overall,NA,after=348),
-  neurotocism = append(varImp(model_N)$importance$Overall,NA,after=349)
-)
-datatable(imp_tbl)
+
+# get overall data sharing attitudes for prediction
+
+
 ```
