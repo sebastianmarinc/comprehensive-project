@@ -1,0 +1,58 @@
+---
+title: "Project C"
+author: "Sebastian Marin"
+date: "`r Sys.Date()`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    code_folding: hide
+---
+
+```{r setup, include = F}
+library(knitr)
+library(rmdformats)
+library(tidyverse)
+library(caret)
+library(doParallel)
+library(naniar)
+# library(DT)
+# library(data.table)
+
+# global options
+opts_chunk$set(echo=T, cache=T,prompt=F,tidy=T,comment=NA,message=F,warning=F)
+```
+
+# R Studio API Code
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+```
+
+# Data Importing and Cleaning
+```{r}
+load("/Users/sebastianmarin/Downloads/ICPSR_29941/DS0001/29941-0001-Data.rda")
+df = da29941.0001
+colnames(df) = tolower(colnames(df))
+
+# missingness summaries
+miss_var_summary(df)
+miss_case_summary(df)
+
+# drop variables with over 70% missingness
+var_miss_70 = miss_var_summary(df) %>% 
+  filter(pct_miss > 70) %>% 
+  select(variable)
+
+df = df %>% 
+  select(-unlist(var_miss_70))
+
+# drop conditional variables
+df = df %>% 
+  select(-str_subset(names(df), "yn"))
+
+# convert factors to numerics
+
+
+# get overall data sharing attitudes for prediction
+
+
+```
