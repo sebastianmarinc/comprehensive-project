@@ -1,58 +1,558 @@
 ---
-title: "Project C"
+title: "Project C: Data Sharing in the Social Sciences in the late 20th Century"
 author: "Sebastian Marin"
 date: "`r Sys.Date()`"
 output:
   rmdformats::readthedown:
     highlight: kate
-    code_folding: hide
 ---
 
 ```{r setup, include = F}
-library(knitr)
-library(rmdformats)
-library(tidyverse)
-library(caret)
-library(doParallel)
-library(naniar)
-# library(DT)
-# library(data.table)
+library(knitr) #v. 1.28 
+library(rmdformats) #v. 0.3.7
+library(tidyverse) #v. 1.3.0
+library(caret) #v. 6.0.86
+library(doParallel) #v. 1.0.15
+library(naniar) #v. 0.5.1
+library(DT) #v. 0.13
+library(janitor) #v. 2.0.1
+library(fastDummies) #v. 1.6.1
+library(GGally) #v. 1.5.0
 
 # global options
-opts_chunk$set(echo=T, cache=F,prompt=F,tidy=T,comment=NA,message=F,warning=F)
+opts_chunk$set(echo=T, cache=F, prompt=F, tidy=T, comment=NA, message=F, warning=F)
 ```
 
 # R Studio API Code
-```{r}
+```{r wd}
+# comment out when knitting the file 
 #setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 ```
 
 # Data Importing and Cleaning
-```{r}
-load("/Users/sebastianmarin/Downloads/ICPSR_29941/DS0001/29941-0001-Data.rda")
+
+## The dataset 
+Data were from Pienta and Lyle (2009) on data sharing in the social sciences. The overall goal of the project was to find variables related to data sharing attitudes and activities. Researchers surveyed principal investigators of social science awards made by the National Science Foundation (NSF) and the National Institutes of Health (NIH) between 1985 and 2001 was conducted by the Inter-university Consortium for Political and Social Research (ICPSR) from May 2009 to August 2009. The survey consisted of questions about the research data collected, various methods for sharing research data, attitudes and behaviors about data sharing, and demographic information. A total of 1,217 responses were received. After excluding principal investigators that did not collect primary research data and excluding principal investigators of dissertation awards, the final sample size is 1,021. More information can be found in the 'docs' directory of this R project. There you will find the project description, codebook, and the survey. 
+
+This dataset was chosen due to the growing trend in data sharing. I wanted to understand predictors of data sharing attitudes and data sharing behaviors. This might illuminate reasons associated with eventual data sharing, which is an important open science practice in my opinion. 
+
+There 100+ variables included in the dataset that could be related to data sharing attitudes and behaviors. With that many potential predictors, it would be beneficial to use machine learning from a large set of variables. 
+
+<br /> 
+
+Let's import the data and coerce all variables to lowercase for readability.
+```{r import}
+load("../data/29941-0001-Data.rda")
 df = da29941.0001
 colnames(df) = tolower(colnames(df))
+```
 
+
+Let's reorder and rename variables to names that are more descriptive. 
+```{r reorder_rename}
+# reorder
+df = df %>% 
+  mutate(
+    year  = as.ordered(year),
+    duration = as.ordered(duration),
+    var7  = as.ordered(var7),
+    var30 = as.ordered(var30),
+    var31 = as.ordered(var31),
+    var32 = as.ordered(var32),
+    var33 = as.ordered(var33), 
+    var34 = as.ordered(var34),
+    var35 = as.ordered(var35),
+    var36 = as.ordered(var36),
+    var37 = as.ordered(var37),
+    var50 = as.ordered(var50), 
+    var51 = as.ordered(var51),
+    var52 = as.ordered(var52),
+    var53 = as.ordered(var53), 
+    var55 = as.ordered(var55),
+    var56 = as.ordered(var56), 
+    var57 = as.ordered(var57),
+    var58 = as.ordered(var58),
+    var59 = as.ordered(var59), 
+    var60 = as.ordered(var60),
+    var61 = as.ordered(var61),
+    var62 = as.ordered(var62),
+    var67 = as.ordered(var67),
+    var68 = as.ordered(var68),
+    var69 = as.ordered(var69),
+    var70 = as.ordered(var70),
+    var78 = as.ordered(var78),
+    var80 = as.ordered(var80),
+    var84 = as.ordered(var84)
+  )
+
+# rename
+df = df %>% 
+  rename(
+    collect_for_grant = var4,
+    num_requests = var7,
+    data_available = var9,
+    data_personal_website = var12, 
+    data_prof_website = var13,
+    data_prof_archive = var14,
+    data_institute_repo = var15, 
+    data_journal_website = var16,
+    data_request = var17,
+    data_available_other = var18,
+    access_coinvestigator = var21, 
+    access_grad_student_grant = var22,
+    access_grad_student_other = var23,
+    access_researcher_institute = var24, 
+    access_researcher_discipline = var25,
+    access_researcher_other = var26,
+    access_other = var27,
+    barrier_grant_no_interest = var30,
+    barrier_grant_prep_data_docs = var31,
+    barrier_grant_misinterpret_data = var32,
+    barrier_grant_prep_data_time = var33, 
+    barrier_grant_confidentiality = var34,
+    barrier_grant_icf_lang = var35,
+    barrier_grant_irb = var36,
+    barrier_grant_scooping = var37,
+    num_pubs_grant = var40_coded,
+    num_pubs_grant_student_author = var41_coded,
+    num_pubs_grant_total = var43_coded,
+    num_pubs_grant_total_student_author = var44_coded,
+    num_pubs_grant_total_unaffiliated = var46_coded,
+    num_pubs_grant_total_unaffil_student_author = var47_coded,
+    data_available_important = var50, 
+    data_available_freq = var51,
+    data_important_archive = var52,
+    data_available_freq_archive = var53, 
+    barrier_no_interest = var55,
+    barrier_prep_data_docs = var56, 
+    barrier_misinterpret_data = var57,
+    barrier_prep_data_time = var58,
+    barrier_confidentiality = var59, 
+    barrier_icf_lang = var60,
+    barrier_irb = var61,
+    barrier_scooping = var62,
+    barrier_other = var63, 
+    discipline_specific = var66_coded,
+    data_available_important_others = var67,
+    data_available_freq_others = var68,
+    data_important_archive_others = var69,
+    data_available_freq_archive_others = var70,
+    num_grant_public = var73_coded,
+    num_grant_private = var74_coded,
+    num_grant_other = var75_coded,
+    num_grant_produced_data = var76_coded,
+    grant_award_academic_rank = var78,
+    grant_award_tenure = var79,
+    academic_rank = var80,
+    gender = var82,
+    race_white = var83_1,
+    race_black = var83_2,
+    race_hispanic = var83_3,
+    race_asian = var83_4,
+    race_island = var83_5,
+    race_arabic = var83_6,
+    race_indigenous = var83_7,
+    education = var84,
+    education_us = var85, 
+    education_year = var86_coded,
+    age = var87_coded,
+    age_at_award = ageataward,
+    faculty_status = facstatus,
+    discipline_general = discipline,
+    discipline_social_science = socsci
+  )
+```
+
+<br />
+
+Let's explore missingness in the variables. 
+```{r table 1, echo=F}
 # missingness summaries
-miss_var_summary(df)
-miss_case_summary(df)
+df %>% miss_var_summary %>% datatable
+```
 
+<br /> 
+
+Let's explore missingness in cases. 
+```{r table 2, echo=F}
+df %>% miss_case_summary %>% datatable
+```
+
+<br />
+
+The rough cutoff I'm comfortable with is 70% missingness in either variables or cases. There are more precise metrics for assessing missingness (e.g., [Madley-Dowd et al., 2019](https://doi.org/10.1016/j.jclinepi.2019.02.016)). However, because estimating these metrics have substantial computational costs, and missingness is not the focus of the current project, I will go with the basic percent missing as a cutoff. 
+
+Seeing as there were no cases with over 70% missingness, I dropped only variables over the threshold. 
+```{r drop_70}
 # drop variables with over 70% missingness
-var_miss_70 = miss_var_summary(df) %>% 
+var_miss_70 = df %>% 
+  miss_var_summary %>% 
   filter(pct_miss > 70) %>% 
   select(variable)
 
-df = df %>% 
+df_miss = df %>% 
   select(-unlist(var_miss_70))
+```
 
-# drop conditional variables
-df = df %>% 
-  select(-str_subset(names(df), "yn"))
+I dropped conditional "yes/no" variables because those variables are missing not at random. I also discovered that all variables with "masked" as a level has near-zero or zero variance. I'll be dropping those shortly when preprocessing.
+```{r drop_yn}
+# drop conditional (ie. MNAR) variables 
+df_drop = df_miss %>% 
+  select(-str_subset(names(df_miss), "yn"))
 
-# convert factors to numerics
+# label rownames from case id
+df_drop = column_to_rownames(df_drop, "caseid") 
+```
 
+<br />
 
-# get overall data sharing attitudes for prediction
+# Analysis 
 
+## Data wrangling
+Let's convert factors to numerics and preprocess.
+```{r preprocessing}
+# convert to numeric
+df_num = df_drop
+for(i in seq_along(df_num)) {
+  df_num[,i] = as.numeric(df_num[,i])
+}
+
+# preprocess
+df_pp = preProcess(df_num, c("medianImpute","zv","nzv"))
+
+# get features
+df_fts = predict(df_pp, df_num)
+```
+
+Once we have preprocessed features, let's dummy code nominal categorical variables. 
+```{r dummy_code}
+# get data frame of unordered factors 
+ordered = c()
+for(i in seq_along(df_drop)){
+  ordered[i] = !is.ordered(df_drop[,i])
+}
+df_ordered = df_drop[,ordered]
+
+# get data frame of numeric variables
+numeric = c()
+for(i in seq_along(df_ordered)){
+  numeric[i] = is.numeric(df_ordered[,i])
+}
+df_factors = df_ordered[,!numeric]
+
+# get variables to dummy code (i.e., unordered factors and non-numeric variables)
+dum_names = names(df_factors)
+
+# match dummy variables to what is in the features data frame
+# df_fts %in% dum_names
+# match(names(df_fts),dum_names)
+
+# dummy code categorical variables to make new features 
+df_fts = df_fts %>% 
+  dummy_cols(select_columns = dum_names,
+             ignore_na = F,
+  ) %>% 
+  clean_names()
+```
+
+If we want to predict overall __data sharing attitudes__, I'll need to take the average of the following: 
+
+- __data_available_important__ ("How important is it to you to make your data available for others to use for their own research purposes?")
+- __data_available_important_others__ ("How important do you think making data available for others to use for research purposes is to others in your discipline or field?")
+- __data_important_archive__ ("How important is placing your data in a professional data archive?")
+- __data_important_archive_others__ ("How important do you think it is to others in your discipline to place their data in a professional data archive?")
+
+I'm also interested in overall __data sharing behaviors__ (as opposed to what's required by grant-awarding agencies), so I'll take an average of the following: 
+
+- __data_available_freq__ ("How often have you made your data available to others to use for their own research purposes?")
+- __data_available_freq_others__ ("How often do you think others in your discipline make their data available for others to use for their own research purposes?")
+- __data_available_freq_archive__ ("How often have you placed your data in a professional archive?")
+- __data_available_freq_archive_others__ ("How often do you think others in your discipline place their data in a professional data archive?")
+
+After getting means, I'll drop the variables from the dataset. If they aren't dropped, they would suck up the most variance, and I'm interested in those variables anymore. 
+
+```{r dv}
+# create data sharing attitudes dv
+df_fts = df_fts %>% 
+  rowwise() %>% 
+  mutate(data_sharing_attitudes = 
+           mean(
+             c(
+               data_available_important,
+               data_available_important_others,
+               data_important_archive,
+               data_important_archive_others
+             )
+           )
+  ) %>% 
+  select(-data_available_important,
+         -data_available_important_others,
+         -data_important_archive,
+         -data_important_archive_others)
+
+# create data sharing behaviors dv
+df_fts = df_fts %>% 
+  rowwise() %>% 
+  mutate(data_sharing_behaviors = 
+           mean(
+             c(
+               data_available_freq,
+               data_available_freq_others,
+               data_available_freq_archive,
+               data_available_freq_archive_others
+             )
+           )
+  ) %>% 
+  select(
+    -data_available_freq,
+    -data_available_freq_others,
+    -data_available_freq_archive,
+    -data_available_freq_archive_others
+  )
 
 ```
+
+The correlation between data sharing attitudes and data sharing behaviors is `r cor(df_fts$data_sharing_attitudes, df_fts$data_sharing_behaviors) %>% round(., digits =3)`, which is relatively large for psychological variables. 
+
+<br />
+
+## Machine learning
+
+Now that we have our data, let's create train and holdout sets. There are several ways to split datasets (e.g., [Guyon, 1997](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.33.1337&rep=rep1&type=pdf)), but we will stick to the Pareto principle, i.e., an 80/20 split. 
+
+```{r train_test_split}
+# split into training and test sets
+set.seed(42)
+train_i = createDataPartition(df_fts$data_sharing_attitudes, p = .8, list = F)
+train = df_fts[train_i, ]
+test = df_fts[-train_i, ]
+
+```
+
+### Modeling data sharing attitudes 
+
+Below, I'm training models to predict data sharing __attitudes__ using some popular algorithms in the machine learning space. These algorithms are not fit for every prediction problem, but they can be useful as a first step before hyper-parameter tuning or more advanced ensembling methods. 
+
+The algorithms chosen were: elastic net, random forests, and gradient boosted machine. It's better to train models using various methods and comparing which gets you the lowest amount of error based on the initial 80/20 split. 
+
+```{r modeling_attitudes}
+# get relevant objects
+algo = c("glmnet", "rf", "gbm") #methods
+attitude_m = list() #store trained models 
+attitude_p = list() #store predictions
+attitude_v = list() #store validities
+
+# set up parallelization 
+cores = detectCores()
+registerDoParallel(cores)
+
+for(i in seq_along(algo)) {
+  # train models
+  attitude_m[[algo[i]]] = train(
+    data_sharing_attitudes ~ .,
+    data = df_fts,
+    method = algo[[i]],
+    na.action = na.pass,
+    trControl = trainControl(
+      method = "cv",
+      number = 10,
+      verboseIter = T,
+      allowParallel = T
+    )
+  )
+  
+  # predict on holdout 
+  attitude_p[[algo[i]]] = predict(attitude_m[[i]], test)
+}
+
+# clean up 
+registerDoSEQ()
+```
+
+According to the dotplot, we can see that all models are performing similarly because all confidence intervals (CI) overlap. Random forest algorithm seems to produce the largest CIs, the highest $RMSE$, and the lowest $R^2$
+
+```{r attitudes_bwplot}
+# model comparison
+resamp_a = resamples(attitude_m)
+bwplot(resamp_a, metric = "RMSE")
+bwplot(resamp_a, metric = "Rsquared")
+```
+
+Upon closer inspection, gradient boosted machine produces the lowest mean and median $RMSE$ as well as the highest mean $R^2$. 
+```{r attitudes_resamp_summary}
+summary(resamp_a)
+```
+
+Let's look at the importance / relative influence of each variable for each model. 
+All models share the same top 5 important variables, albiet assigning different values of importance. However, the top 19 important variables in elastic net and random forest overlap, whereas gradient boosted machine seems to diverge sharply from elastic net variable importance. 
+
+```{r attitudes_var_imp, fig.show='hide'}
+# reorder relative importance of gbm to fit variable importance order of other algorithms
+gbm_a = summary(attitude_m[[3]])
+first_a = rownames_to_column(varImp(attitude_m[[1]])$importance)$rowname
+second_a = rownames_to_column(gbm_a)$rowname
+reorder_a = match(first_a, second_a)
+
+# get variable importance tibble
+attitude_var_imp = tibble(
+variable = names(df_fts[,-grep("data_sharing_attitudes",colnames(df_fts))]),
+elastic_net = varImp(attitude_m[[1]])$importance$Overall,
+random_forest = varImp(attitude_m[[2]])$importance$Overall,
+gradient_boost = gbm_a[reorder_a,]$rel.inf
+)
+
+# output data table
+datatable(attitude_var_imp)
+
+```
+
+### Modeling data sharing behaviors
+
+Below, I'm training models to predict data sharing __behaviors__ using some popular algorithms in the machine learning space.
+
+```{r modeling_behaviors}
+behavior_m = list() #store trained models 
+behavior_p = list() #store predictions
+behavior_v = list() #store validities
+
+# set up parallelization 
+cores = detectCores()
+registerDoParallel(cores)
+
+for(i in seq_along(algo)) {
+  # train models
+  behavior_m[[algo[i]]] = train(
+    data_sharing_behaviors ~ .,
+    data = df_fts,
+    method = algo[[i]],
+    na.action = na.pass,
+    trControl = trainControl(
+      method = "cv",
+      number = 10,
+      verboseIter = T,
+      allowParallel = T
+    )
+  )
+  
+  # predict on holdout 
+  behavior_p[[algo[i]]] = predict(behavior_m[[i]], test)
+}
+
+# clean up 
+registerDoSEQ()
+```
+
+The box-and-whisker plots show that elastic net gives the lowest median $RMSE$ and about the same $R^2$
+```{r behavior_bwplot}
+# model comparison
+resamp_b = resamples(behavior_m)
+bwplot(resamp_b, metric = "RMSE")
+bwplot(resamp_b, metric = "Rsquared")
+```
+
+It appears that random forst has the lowest mean $RMSE$ but the highest median. Elastic net has the lowest median $RMSE$. Random forest has the highest median and mean $R^2$. 
+
+```{r behaviors_resamp_summary}
+summary(resamp_b)
+```
+
+Let's look at the importance / relative influence of each variable for each model. 
+All models share the same top 4 important variables, albiet assigning different values of importance. Again, the top important variables in elastic net and random forest overlap, whereas gradient boosted machine seems to diverge from elastic net.  
+
+```{r behaviors_var_imp, fig.show='hide'}
+# reorder relative importance of gbm to fit variable importance order of other algorithms
+gbm_b = summary(behavior_m[[3]])
+first_b = rownames_to_column(varImp(behavior_m[[1]])$importance)$rowname
+second_b = rownames_to_column(gbm_b)$rowname
+reorder_b = match(first_b, second_b)
+
+# get variable importance tibble
+behavior_var_imp = tibble(
+variable = names(df_fts[,-grep("data_sharing_behaviors",colnames(df_fts))]),
+elastic_net = varImp(behavior_m[[1]])$importance$Overall,
+random_forest = varImp(behavior_m[[2]])$importance$Overall,
+gradient_boost = gbm_b[reorder_b,]$rel.inf
+)
+
+# output data table
+datatable(behavior_var_imp)
+
+```
+
+<br />
+
+## Machine learning conclusions 
+
+### Modeling
+Overall, I think the best performing model comes from gradient boosting for both outcomes, particularly data sharing attitudes. Regarding data sharing attitudes, I would select gradient boosting as an overall strategy and start hyper-parameter tuning as well as possbily implementing other gradient boosting algorithms (e.g., extreme gradient boosting). As for data sharing behaviors, the further modeling strategy is less clear. From the box-and-whisker plots, the distribution of $RMSE$ and $R^2$ looked slightly skewed for all modeling approaches. There is ambiguity as to whether modeling strategy decision should be based on mean or median of aforementioned metrics. Random forest does seem to have less variance in $R^2$ and but a larger range in $RMSE$ values. However, going by the median of values, I'd probably go with random forest. We could also stack all models to include various machine learning algorithms. 
+ 
+It is noted that modeling process assumes linearity, even though interactions between variables could very well be present. Another alternative is modeling interactions between all variables to explroe interactions a little more. It might be a better reflection of the complexities that go into deciding whether to share data. However, to model interactions between all variables in this dataset would take tremendous computational effort. Paired combinations among variables is can be calculated by $\frac{n!}{k!(k - n)!}$, which in this case, with 139 features, would be an extra `r 139*(139-1)/2` variables to include in the model. 
+
+### Variable importance
+
+
+Since GBM models performed the best for data sharing attitudes, I wanted to explore the relationships between the top 5 variables that exerted the most influence in this class of models. The variables are: 
+
+- __data_sharing_behaviors__ (average)
+- __barrier_misinterpret_data__ ("I am concerned about the potential for others misinterpretation of my data")
+- __num_grant_produced_data__ ("As a Principal Investigator how many research grants received throughout your career have produced primary research data?")
+- __data_available_freq_archive_others__("How often do you think others in your discipline place their data in a professional data archive?")
+- __age_at_award__ (derived from year)
+- __barrier_scooping__ ("I am concerned that other researchers will publish findings before me")
+
+Given the correlation between data sharing behaviors and attitudes, it makes sense that behaviors is the most important variable for attitudes. Interestingly, it seems as though fears of data misinterpretation and data scooping are also important regarding data sharing attitudes. These fears would likely lead to not sharing/posting data. Number of grants received also seemed to be an important predictor. Since we the dataset only had information on NSF and NIH agencies, and since these agencies require public and open practices, it makes sense this would be a significant predictor. What also seemed important to attitudes was whether other researchers posted their data. 
+
+Since elastic net models were evaluated to perform better than otehr models overall, the relationships between the top 5 most important variables given by elastic net were explored. The variables are: 
+
+- __data_sharing_attitudes__ (average)
+- __sharing_status__ (derived: coded as (1) shared formally, archived; (2) shared informally, not archived; (3) not shared)
+- __discipline_general_4__ (derived: discipline 4 was coded as _sociology_)
+- __region_1__ (derived: region 1 was coded as _northeast US_)
+- __data_prof_archive__ ("Have you made these data available for others to use for their own research purposes: through a professional data archive?")
+
+Similarly, data sharing attitudes was the most important predictor of overall data sharing behaviors. What was also interesting was that the region the PI was in and being in the sociology discipline was important for behaviors. There are most likely culture/climate on specific data sharing practices in the northeast region of the US as well as within sociology. Of course, uploading grant data to an archive predicted overall data sharing behaviors within one's career. It might be useful to look into whether federal grants impact the data sharing frequency and data sharing attitudes. It seems likely that more federal grants could shape open science practices by merely requiring them. 
+
+<br />
+
+# Visualization
+
+## Data sharing attitudes
+
+These are the relationships between the top 5 important predictors of data sharing attitudes.
+```{r attitudes_ggpairs}
+df_fts %>% 
+  select(
+    data_sharing_behaviors,
+    barrier_misinterpret_data,
+    num_grant_produced_data,
+    barrier_scooping,
+    age_at_award
+  ) %>% 
+  ggpairs()
+
+```
+
+## Data sharing behaviors
+
+These are the relationships between the top 5 important predictors of data sharing behaviors
+
+```{r behaviors_ggpairs}
+df_fts %>% 
+  select(
+    data_sharing_behaviors,
+    data_prof_archive,
+    sharing_status,
+    discipline_general_4,
+    region_1
+  ) %>% 
+  ggpairs()
+
+```
+
+The correlations make it seem like there is no relationship between any of the top 5 important variables for each criterion, except for some small positive relationships. However, looking at the scatter plots reveal that the data most likely need to be transformed if one would like to use a Pearson correlation since it assumes linearity. 
+
+There are several vavriables that appear categorical, and thus, alternative kinds of correlations are needed to uncover these relationships (e.g., tetrachoric, point-biserial, polychoric, etc.). 
+
+
+
+
